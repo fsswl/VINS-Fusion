@@ -1,0 +1,91 @@
+%YAML:1.0
+
+#common parameters
+#support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
+imu: 1         
+num_of_cam: 2  
+
+imu_topic: "/imu0"
+image0_topic: "/cam0/image_raw"
+image1_topic: "/cam1/image_raw"
+output_path: "/home/pci/output/"
+
+cam0_calib: "left_kannala_brandt_2018111100668.yaml"
+cam1_calib: "right_kannala_brandt_2018111100668.yaml"
+image_width: 640
+image_height: 400
+   
+
+# Extrinsic parameter between IMU and Camera.
+estimate_extrinsic: 0   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
+                        # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
+
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+#   data: [-0.999884, -0.014471, -0.004772, 0.05997968651546687,
+#          0.01447, -0.999895, 0.000406, -3.088104833860825e-05,
+#          -0.004777, 0.000337, 0.999989, -0.002,
+#          0., 0., 0., 1.]
+   #data: [-0.9998837952869233, 0.01446922769596299,
+   #       -0.004777372528651574, 0.05996360867306752,
+   #       -0.01447177533208984, -0.9998954544259274,
+   #       0.0003369019485336277, 0.0008378085317764004,
+   #       -0.004771620389623004, 0.0004060887358212467,
+   #       0.9999880648241869, 0.002286188965234652, 0., 0., 0., 1.]
+   data: [ -9.9981736474194394e-01, 0.011891411941153, -0.01496099871403, 0.060462072314646,     # l1 
+          -0.011763156823021, -0.999893555939416, -0.008631623971663, -0.002941903067156,
+           -0.015062048400945, -0.00845405895869, 0.999850820665308, 0.008170601606802,
+            0., 0., 0.,  1. ]
+
+body_T_cam1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+#   data: [-0.999753202026215, -0.01530772632609431, 0.01610601856623201, -0.05993246887852265,
+#          0.0154777301369398, -0.9998255320199336, 0.01043561938099451, 5.187741408572975e-05,
+#          0.01594384923926928, 0.01068243285733143, 0.9998162894845656, -0.002,
+#          0., 0., 0., 1.]
+  # data: [-0.999752988714218, 0.0154769602933164,
+  #        0.01594345751187863, -0.05988658087197905,
+  #        -0.01530849752634972, -0.9998259861117641,
+  #        0.0106823248390726, -0.0008442430152015576,
+  #        0.01610640184092423, 0.01043572879717157,
+  #        0.9998153632949546, 0.002964385775041983, 0., 0., 0., 1.]
+   data: [ -9.9999119717458229e-01, 0.003194895506913, 0.002719966184707, -0.057673426117768,
+           -0.003156411536277, -0.999896489915182, 0.014037326010039, -0.00708156349004,
+            0.002764532430575, 0.014028617109265, 0.99989777240598, 0.006622193771947,
+            0., 0., 0., 1. ]
+
+#Multiple thread support
+multiple_thread: 1
+
+#feature traker paprameters
+max_cnt: 70            # max feature number in feature tracking
+min_dist: 30            # min distance between two features 
+freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
+F_threshold: 1.0        # ransac threshold (pixel)
+show_track: 1           # publish tracking image as topic
+flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
+
+#optimization parameters
+max_solver_time: 0.04  # max solver itration time (ms), to guarantee real time
+max_num_iterations: 8   # max solver itrations, to guarantee real time
+keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
+
+#imu parameters       The more accurate parameters you provide, the better performance
+acc_n: 1.7214282890825171e-02 #0.270230249263 #0.09   #0.009          # accelerometer measurement noise standard deviation. #0.2   0.04
+gyr_n: 1.2824006913728701e-03 #0.0201311585666 #0.002  #0.12          # gyroscope measurement noise standard deviation.     #0.05  0.004
+acc_w: 3.0211238978328057e-04 #1.92452479e-05 #0.0004 #0.00004       # accelerometer bias random work noise standard deviation.  #0.02
+gyr_w: 3.1239314016016067e-05 #1.99001551e-6 #7.0e-7 #0.00004       # gyroscope bias random work noise standard deviation.     #4.0e-5
+g_norm: 9.8019967000000001e+00        # gravity magnitude
+
+#unsynchronization parameters
+estimate_td: 0                      # online estimate time offset between camera and imu
+td: 0.0                             # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
+
+#loop closure parameters
+load_previous_pose_graph: 0        # load and reuse previous pose graph; load from 'pose_graph_save_path'
+pose_graph_save_path: "/home/pci/output/pose_graph/" # save and load path
+save_image: 1                   # save image in pose graph for visualization prupose; you can close this function by setting 0 

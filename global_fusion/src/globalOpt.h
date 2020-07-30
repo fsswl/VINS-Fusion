@@ -31,12 +31,18 @@ public:
 	GlobalOptimization();
 	~GlobalOptimization();
 	void inputGPS(double t, double latitude, double longitude, double altitude, double posAccuracy);
+	void inputUWB(double t, double latitude, double longitude, double altitude, double posAccuracy);
 	void inputOdom(double t, Eigen::Vector3d OdomP, Eigen::Quaterniond OdomQ);
+	void inputPoseGraphPath(const nav_msgs::Path::ConstPtr &path_msg);
 	void getGlobalOdom(Eigen::Vector3d &odomP, Eigen::Quaterniond &odomQ);
+	void optimize_para_ex();
 	nav_msgs::Path global_path;
+	nav_msgs::Path gps_path;
+	nav_msgs::Path uwb_path;
 
 private:
 	void GPS2XYZ(double latitude, double longitude, double altitude, double* xyz);
+	void UWB2XYZ(double latitude, double longitude, double altitude, double* xyz);
 	void optimize();
 	void updateGlobalPath();
 
@@ -45,10 +51,14 @@ private:
 	map<double, vector<double>> globalPoseMap;
 	map<double, vector<double>> GPSPositionMap;
 	bool initGPS;
+	bool initUWB;
 	bool newGPS;
+	bool newUWB;
 	GeographicLib::LocalCartesian geoConverter;
+	GeographicLib::LocalCartesian geoConverter1;
 	std::mutex mPoseMap;
 	Eigen::Matrix4d WGPS_T_WVIO;
+	Eigen::Vector3d ex_vio_gps;
 	Eigen::Vector3d lastP;
 	Eigen::Quaterniond lastQ;
 	std::thread threadOpt;

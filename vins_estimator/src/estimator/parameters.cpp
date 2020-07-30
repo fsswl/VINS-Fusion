@@ -172,6 +172,10 @@ void readParameters(std::string config_file)
         cv::cv2eigen(cv_T, T);
         RIC.push_back(T.block<3, 3>(0, 0));
         TIC.push_back(T.block<3, 1>(0, 3));
+        cv::Mat cv_T0;
+        fsSettings["body_T_cam0"] >> cv_T0;
+        cv::Mat C2C = cv_T.inv() * cv_T0;
+        std::cout << "C2C: " << C2C << std::endl;
     }
 
     INIT_DEPTH = 5.0;

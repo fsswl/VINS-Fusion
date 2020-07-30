@@ -1512,6 +1512,8 @@ void Estimator::outliersRejection(set<int> &removeIndex)
 {
     //return;
     int feature_index = -1;
+    double err_g = 0;
+    int errCnt_g = 0;
     for (auto &it_per_id : f_manager.feature)
     {
         double err = 0;
@@ -1562,10 +1564,14 @@ void Estimator::outliersRejection(set<int> &removeIndex)
             }
         }
         double ave_err = err / errCnt;
+        err_g += ave_err;
+        errCnt_g++;
+        //printf("\r\naver_err: %f \r\n", ave_err * FOCAL_LENGTH);
         if(ave_err * FOCAL_LENGTH > 3)
             removeIndex.insert(it_per_id.feature_id);
 
     }
+    printf("\r\naver_err_g: %f \r\n", err_g / errCnt_g * FOCAL_LENGTH);
 }
 
 void Estimator::fastPredictIMU(double t, Eigen::Vector3d linear_acceleration, Eigen::Vector3d angular_velocity)

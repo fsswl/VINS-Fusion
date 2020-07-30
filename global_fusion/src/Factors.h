@@ -112,3 +112,62 @@ struct RelativeRTError
 	double t_var, q_var;
 
 };
+
+struct exRelativeRTError
+{
+	exRelativeRTError(double t_x_vio, double t_y_vio, double t_z_vio,
+		              double q_w_vio, double q_x_vio, double q_y_vio, double q_z_vio,
+		            double t_x_gps, double t_y_gps, double t_z_gps,
+					double t_var)
+				  :t_x_vio(t_x_vio), t_y_vio(t_y_vio), t_z_vio(t_z_vio),
+				   q_w_vio(q_w_vio), q_x_vio(q_x_vio), q_y_vio(q_y_vio), q_z_vio(q_z_vio),
+				   t_x_gps(t_x_gps), t_y_gps(t_y_gps), t_z_gps(t_z_gps),
+				   t_var(t_var){}
+
+	template <typename T>
+	bool operator()(const T* q, const T* t, const T* t_ex_vio_gps, T* residuals) const
+	{
+		T t_vio[3];
+		t_vio[0] = T(t_x_vio);
+		t_vio[1] = T(t_y_vio);
+		t_vio[2] = T(t_z_vio);
+
+		T q_vio[4];
+		q_vio[0] = T(q_w_vio);
+		q_vio[1] = T(q_x_vio);
+		q_vio[2] = T(q_y_vio);
+		q_vio[3] = T(q_z_vio);
+
+		T t_world_gps[3];
+		ceres::QuaternionRotatePoint(q_vio, t_ex_vio_gps, t_world_gps);
+		t_world_gps[0] = t_world_gps[0] + t_vio[0];
+		t_world_gps[1] = t_world_gps[1] + t_vio[1];
+		t_world_gps[2] = t_world_gps[2] + t_vio[2];
+
+		T t_vio2gps[3];
+		ceres::QuaternionRotatePoint(q, t_world_gps, t_vio2gps);
+
+		residuals[0] = (T(t_x_gps) - t_vio2gps[0] - t[0]) / T(t_var);
+		residuals[1] = (T(t_y_gps) - t_vio2gps[1] - t[1]) / T(t_var);
+		residuals[2] = (T(t_z_gps) - t_vio2gps[2] - t[2]) / T(t_var);
+
+		return true;
+	}
+
+	static ceres::CostFunction* Create(const double t_x_vio, const double t_y_vio, const double t_z_vio,
+		                               const double q_w_vio, const double q_x_vio, const double q_y_vio, const double q_z_vio,
+									   const double t_x_gps, const double t_y_gps, const double t_z_gps,
+									   const double t_var)
+	{
+	  return (new ceres::AutoDiffCostFunction<
+	          exRelativeRTError, 3, 4, 3, 3>(new exRelativeRTError(t_x_vio, t_y_vio, t_z_vio,
+	                                q_w_vio, q_x_vio, q_y_vio, q_z_vio,
+	                                t_x_gps, t_y_gps, t_z_gps, t_var)));
+	}
+
+	double t_x_vio, t_y_vio, t_z_vio;
+	double q_w_vio, q_x_vio, q_y_vio, q_z_vio;
+	double t_x_gps, t_y_gps, t_z_gps;
+	double t_var;
+
+};

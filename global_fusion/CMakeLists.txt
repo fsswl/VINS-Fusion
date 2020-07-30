@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  nmea_msgs
 )
 
 find_package(Ceres REQUIRED)
