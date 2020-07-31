@@ -23,13 +23,13 @@ GlobalOptimization::GlobalOptimization()
 	initGPS = false;
     initUWB = false;
     newGPS = false;
-    ex_vio_gps = Eigen::Vector3d(2.90349, -12.8075, -0.963323);
+    ex_vio_gps = Eigen::Vector3d(2.32996, 0.30695, -0.538865);
 #ifndef TRANSFORM_POSE_GRAPH_PATH
 	WGPS_T_WVIO = Eigen::Matrix4d::Identity();
 #else
-    WGPS_T_WVIO <<  0.481062,   -0.876685, -0.00160619,    0.961294,
-                    0.876686,    0.481063,  2.9913e-05,   -0.269533,
-                    0.000746456, -0.00142252,    0.999999,     13.1627,
+    WGPS_T_WVIO <<  0.487693,   -0.873011,  -0.0028463,    0.877877,
+                    0.873015,    0.487693, 0.000710993,   -0.348232,
+                    0.000767416, -0.00283161,    0.999996,           0,
                     0.,         0.,         0.,          1.;
 #endif
 
@@ -418,7 +418,7 @@ void GlobalOptimization::optimize_para_ex()
 
     t_result[0] = 0;
     t_result[1] = 0;
-    t_result[2] = 0;
+    //t_result[2] = 0;
     q_result[0] = 1;
     q_result[1] = 0;
     q_result[2] = 0;
@@ -427,8 +427,9 @@ void GlobalOptimization::optimize_para_ex()
     t_ex_result[1] = 0;
     t_ex_result[2] = 0;
     problem.AddParameterBlock(q_result, 4, local_parameterization);
-    problem.AddParameterBlock(t_result, 3);
+    problem.AddParameterBlock(t_result, 2);
     problem.AddParameterBlock(t_ex_result, 3);
+    //problem.SetParameterBlockConstant(&t_result[2]);
 
     map<double, vector<double>>::iterator iterVIO, iterGPS;
     int i = 0;
@@ -447,8 +448,8 @@ void GlobalOptimization::optimize_para_ex()
     std::cout << summary.FullReport() << std::endl;
     Eigen::Matrix4d qt_result = Eigen::Matrix4d::Identity();
     qt_result.block<3, 3>(0, 0) = Eigen::Quaterniond(q_result[0], q_result[1], q_result[2], q_result[3]).toRotationMatrix();
-    qt_result.block<3, 1>(0, 3) = Eigen::Vector3d(t_result[0], t_result[1], t_result[2]);
-    std::cout << "t_result: " << t_result[0] << ", " << t_result[1] << ", " << t_result[2] << ", " << std::endl;
+    qt_result.block<3, 1>(0, 3) = Eigen::Vector3d(t_result[0], t_result[1], 0.);
+    std::cout << "t_result: " << t_result[0] << ", " << t_result[1] << ", " << "0." << ", " << std::endl;
     std::cout << "q_result: " << q_result[0] << ", " << q_result[1] << ", " << q_result[2] << ", " << q_result[3] << ", " << std::endl;
     std::cout << "qt_martix: " << qt_result << std::endl;
     std::cout << "t_ex_result: " << t_ex_result[0] << ", " << t_ex_result[1] << ", " << t_ex_result[2] << ", " << std::endl;

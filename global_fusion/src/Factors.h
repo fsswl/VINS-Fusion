@@ -149,7 +149,7 @@ struct exRelativeRTError
 
 		residuals[0] = (T(t_x_gps) - t_vio2gps[0] - t[0]) / T(t_var);
 		residuals[1] = (T(t_y_gps) - t_vio2gps[1] - t[1]) / T(t_var);
-		residuals[2] = (T(t_z_gps) - t_vio2gps[2] - t[2]) / T(t_var);
+		residuals[2] = (T(t_z_gps) - t_vio2gps[2] - T(0)) / T(t_var);
 
 		return true;
 	}
@@ -160,7 +160,7 @@ struct exRelativeRTError
 									   const double t_var)
 	{
 	  return (new ceres::AutoDiffCostFunction<
-	          exRelativeRTError, 3, 4, 3, 3>(new exRelativeRTError(t_x_vio, t_y_vio, t_z_vio,
+	          exRelativeRTError, 3, 4, 2, 3>(new exRelativeRTError(t_x_vio, t_y_vio, t_z_vio,
 	                                q_w_vio, q_x_vio, q_y_vio, q_z_vio,
 	                                t_x_gps, t_y_gps, t_z_gps, t_var)));
 	}
